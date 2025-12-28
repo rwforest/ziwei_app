@@ -1,0 +1,59 @@
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#f8f9fa" />
+  <!-- Header -->
+  <rect width="800" height="60" fill="#2c3e50" />
+  <text x="20" y="40" font-family="Arial, sans-serif" font-size="24" fill="white" font-weight="bold">🌟 紫微斗數命盤 - Destiny Board</text>
+  
+  <!-- Info Cards -->
+  <rect x="20" y="80" width="370" height="100" rx="8" fill="white" stroke="#dee2e6" />
+  <text x="40" y="110" font-family="Arial, sans-serif" font-size="16" fill="#495057" font-weight="bold">基本資料 (Basic Info)</text>
+  <text x="40" y="135" font-family="Arial, sans-serif" font-size="14" fill="#6c757d">生日：1990年1月1日 亥時</text>
+  <text x="40" y="155" font-family="Arial, sans-serif" font-size="14" fill="#6c757d">性別：男 | 五行：木三局</text>
+
+  <rect x="410" y="80" width="370" height="100" rx="8" fill="white" stroke="#dee2e6" />
+  <text x="430" y="110" font-family="Arial, sans-serif" font-size="16" fill="#495057" font-weight="bold">本命四化 (Si Hua)</text>
+  <text x="430" y="135" font-family="Arial, sans-serif" font-size="14" fill="#d63384">化祿: 廉貞 | 化權: 破軍</text>
+  <text x="430" y="155" font-family="Arial, sans-serif" font-size="14" fill="#0d6efd">化科: 武曲 | 化忌: 太陽</text>
+
+  <!-- Grid Mockup -->
+  <g transform="translate(20, 200)">
+    <!-- Row 1 -->
+    <rect x="0" y="0" width="185" height="120" fill="white" stroke="#ced4da" />
+    <text x="10" y="25" font-family="Arial, sans-serif" font-size="14" font-weight="bold">巳 - 父母</text>
+    <rect x="195" y="0" width="185" height="120" fill="white" stroke="#ced4da" />
+    <text x="205" y="25" font-family="Arial, sans-serif" font-size="14" font-weight="bold">午 - 福德</text>
+    <rect x="390" y="0" width="185" height="120" fill="white" stroke="#ced4da" />
+    <text x="400" y="25" font-family="Arial, sans-serif" font-size="14" font-weight="bold">未 - 田宅</text>
+    <rect x="585" y="0" width="175" height="120" fill="white" stroke="#ced4da" />
+    <text x="595" y="25" font-family="Arial, sans-serif" font-size="14" font-weight="bold">申 - 事業</text>
+
+    <!-- Row 2 -->
+    <rect x="0" y="130" width="185" height="120" fill="white" stroke="#ced4da" />
+    <text x="10" y="155" font-family="Arial, sans-serif" font-size="14" font-weight="bold">辰 - 命宮</text>
+    <text x="10" y="180" font-family="Arial, sans-serif" font-size="18" fill="#dc3545">紫微 天府</text>
+    
+    <!-- Center Empty Space -->
+    <rect x="195" y="130" width="380" height="250" rx="10" fill="#e9ecef" opacity="0.5" />
+    <text x="280" y="260" font-family="Arial, sans-serif" font-size="32" fill="#adb5bd" font-weight="bold">ZI WEI APP</text>
+
+    <rect x="585" y="130" width="175" height="120" fill="white" stroke="#ced4da" />
+    <text x="595" y="155" font-family="Arial, sans-serif" font-size="14" font-weight="bold">酉 - 交友</text>
+
+    <!-- Row 3 -->
+    <rect x="0" y="260" width="185" height="120" fill="white" stroke="#ced4da" />
+    <text x="10" y="285" font-family="Arial, sans-serif" font-size="14" font-weight="bold">卯 - 兄弟</text>
+    
+    <rect x="585" y="260" width="175" height="120" fill="white" stroke="#ced4da" />
+    <text x="595" y="285" font-family="Arial, sans-serif" font-size="14" font-weight="bold">戌 - 遷移</text>
+
+    <!-- Row 4 -->
+    <rect x="0" y="390" width="185" height="120" fill="white" stroke="#ced4da" />
+    <text x="10" y="415" font-family="Arial, sans-serif" font-size="14" font-weight="bold">寅 - 夫妻</text>
+    <rect x="195" y="390" width="185" height="120" fill="white" stroke="#ced4da" />
+    <text x="205" y="415" font-family="Arial, sans-serif" font-size="14" font-weight="bold">丑 - 子女</text>
+    <rect x="390" y="390" width="185" height="120" fill="white" stroke="#ced4da" />
+    <text x="400" y="415" font-family="Arial, sans-serif" font-size="14" font-weight="bold">子 - 財帛</text>
+    <rect x="585" y="390" width="175" height="120" fill="white" stroke="#ced4da" />
+    <text x="595" y="415" font-family="Arial, sans-serif" font-size="14" font-weight="bold">亥 - 疾厄</text>
+  </g>
+</svg>

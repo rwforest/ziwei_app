@@ -11,6 +11,14 @@ A web application for generating and analyzing Zi Wei Dou Shu (Chinese Astrology
 - **Interactive UI:** A modern, responsive interface for inputting birth data and viewing detailed charts.
 - **Data Export:** Export charts and fortune data to JSON format.
 
+## Screenshots
+
+![Destiny Board](screenshots/destiny_board.svg)
+*Destiny Board and Basic Info*
+
+![Yearly Fortune](screenshots/yearly_fortune.svg)
+*Yearly and Monthly Fortune Analysis*
+
 ## Tech Stack
 
 - **Frontend:** HTML5, CSS3, Vanilla JavaScript

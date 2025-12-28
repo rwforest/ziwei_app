@@ -1,0 +1,45 @@
+<svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="400" fill="#f8f9fa" />
+  <!-- Section Title -->
+  <text x="20" y="40" font-family="Arial, sans-serif" font-size="20" fill="#212529" font-weight="bold">📅 流年運勢 (Yearly Fortune)</text>
+  
+  <!-- Form Mockup -->
+  <rect x="20" y="60" width="760" height="80" rx="8" fill="#e9ecef" />
+  <text x="40" y="90" font-family="Arial, sans-serif" font-size="14" fill="#495057">選擇年份: 2025</text>
+  <rect x="140" y="75" width="80" height="25" rx="4" fill="white" stroke="#ced4da" />
+  <text x="145" y="92" font-family="Arial, sans-serif" font-size="12">2025</text>
+  
+  <rect x="250" y="75" width="120" height="30" rx="4" fill="#0d6efd" />
+  <text x="275" y="95" font-family="Arial, sans-serif" font-size="14" fill="white">查看流年</text>
+
+  <!-- Fortune Cards -->
+  <g transform="translate(20, 160)">
+    <rect x="0" y="0" width="240" height="200" rx="8" fill="white" stroke="#dee2e6" />
+    <text x="15" y="30" font-family="Arial, sans-serif" font-size="16" fill="#0d6efd" font-weight="bold">2025 乙巳年</text>
+    <text x="15" y="60" font-family="Arial, sans-serif" font-size="14" fill="#6c757d">流年歲數: 36</text>
+    <text x="15" y="90" font-family="Arial, sans-serif" font-size="14" fill="#6c757d">流年命宮: 巳 (父母)</text>
+    <text x="15" y="120" font-family="Arial, sans-serif" font-size="14" fill="#d63384">流年四化:</text>
+    <text x="15" y="145" font-family="Arial, sans-serif" font-size="12" fill="#495057">機、梁、紫、陰</text>
+  </g>
+
+  <g transform="translate(280, 160)">
+    <rect x="0" y="0" width="500" height="200" rx="8" fill="white" stroke="#dee2e6" />
+    <text x="20" y="30" font-family="Arial, sans-serif" font-size="16" fill="#198754" font-weight="bold">流年月份概覽</text>
+    
+    <rect x="20" y="50" width="100" height="40" rx="4" fill="#f1f3f5" />
+    <text x="35" y="75" font-family="Arial, sans-serif" font-size="12">正月 (丙寅)</text>
+    
+    <rect x="130" y="50" width="100" height="40" rx="4" fill="#f1f3f5" />
+    <text x="145" y="75" font-family="Arial, sans-serif" font-size="12">二月 (丁卯)</text>
+    
+    <rect x="240" y="50" width="100" height="40" rx="4" fill="#cfe2ff" stroke="#0d6efd" />
+    <text x="255" y="75" font-family="Arial, sans-serif" font-size="12" font-weight="bold">三月 (戊辰)</text>
+    
+    <rect x="350" y="50" width="100" height="40" rx="4" fill="#f1f3f5" />
+    <text x="365" y="75" font-family="Arial, sans-serif" font-size="12">四月 (己巳)</text>
+    
+    <text x="20" y="130" font-family="Arial, sans-serif" font-size="14" fill="#495057">三月運勢重點：</text>
+    <text x="20" y="155" font-family="Arial, sans-serif" font-size="12" fill="#6c757d">• 流月命宮疊本命財帛</text>
+    <text x="20" y="175" font-family="Arial, sans-serif" font-size="12" fill="#6c757d">• 財運旺盛，適合投資規畫</text>
+  </g>
+</svg>
