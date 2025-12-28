@@ -24,6 +24,52 @@ app.use(express.static(path.join(__dirname, 'public')));
 const palaceNames = ['命宮', '兄弟', '夫妻', '子女', '財帛', '疾厄', '遷移', '交友', '事業', '田宅', '福德', '父母'];
 const monthNames = ['正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
 
+// Star brightness table (廟旺得地平不得地落陷)
+// Ground order: 子丑寅卯辰巳午未申酉戌亥
+const brightessTable = {
+    // Major Stars (甲級主星)
+    '紫微': ['旺', '得', '廟', '廟', '得', '得', '旺', '廟', '廟', '平', '得', '得'],
+    '天機': ['廟', '陷', '廟', '旺', '得', '平', '廟', '陷', '旺', '得', '平', '得'],
+    '太陽': ['陷', '陷', '旺', '廟', '廟', '廟', '旺', '得', '平', '陷', '陷', '陷'],
+    '武曲': ['旺', '得', '廟', '得', '旺', '旺', '旺', '得', '廟', '得', '得', '得'],
+    '天同': ['廟', '得', '平', '陷', '陷', '廟', '陷', '得', '平', '陷', '陷', '得'],
+    '廉貞': ['平', '廟', '得', '得', '得', '平', '平', '廟', '得', '得', '得', '平'],
+    '天府': ['廟', '旺', '得', '得', '廟', '廟', '旺', '廟', '得', '得', '旺', '廟'],
+    '太陰': ['廟', '廟', '陷', '陷', '陷', '陷', '陷', '陷', '得', '旺', '廟', '廟'],
+    '貪狼': ['旺', '廟', '平', '平', '得', '得', '旺', '廟', '平', '平', '平', '得'],
+    '巨門': ['旺', '得', '廟', '廟', '得', '平', '旺', '得', '廟', '廟', '得', '平'],
+    '天相': ['廟', '得', '廟', '陷', '得', '廟', '廟', '得', '廟', '陷', '得', '廟'],
+    '天梁': ['廟', '陷', '廟', '得', '得', '廟', '廟', '陷', '旺', '得', '得', '廟'],
+    '七殺': ['廟', '旺', '平', '廟', '旺', '平', '廟', '旺', '平', '廟', '旺', '平'],
+    '破軍': ['旺', '得', '廟', '陷', '陷', '平', '旺', '得', '廟', '陷', '陷', '平'],
+    // Key Minor Stars (乙級輔星)
+    '文昌': ['得', '得', '陷', '旺', '平', '廟', '得', '得', '陷', '旺', '平', '廟'],
+    '文曲': ['旺', '平', '得', '廟', '陷', '得', '旺', '平', '得', '廟', '陷', '得'],
+    '左輔': ['廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟'],
+    '右弼': ['廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟'],
+    '天魁': ['廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟'],
+    '天鉞': ['廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟'],
+    '祿存': ['廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟', '廟'],
+    '天馬': ['旺', '平', '旺', '平', '旺', '平', '旺', '平', '旺', '平', '旺', '平'],
+    '擎羊': ['陷', '廟', '陷', '廟', '陷', '廟', '陷', '廟', '陷', '廟', '陷', '廟'],
+    '陀羅': ['廟', '陷', '廟', '陷', '廟', '陷', '廟', '陷', '廟', '陷', '廟', '陷'],
+    '火星': ['廟', '得', '廟', '得', '廟', '得', '廟', '得', '廟', '得', '廟', '得'],
+    '鈴星': ['得', '廟', '得', '廟', '得', '廟', '得', '廟', '得', '廟', '得', '廟'],
+    '地空': ['平', '平', '平', '平', '平', '平', '平', '平', '平', '平', '平', '平'],
+    '地劫': ['平', '平', '平', '平', '平', '平', '平', '平', '平', '平', '平', '平']
+};
+
+const groundOrder = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+
+// Get brightness for a star at a specific ground
+function getStarBrightness(starName, groundName) {
+    const groundIndex = groundOrder.indexOf(groundName);
+    if (groundIndex === -1) return null;
+    const brightness = brightessTable[starName];
+    if (!brightness) return null;
+    return brightness[groundIndex];
+}
+
 function getMonthSky(yearSkyIndex, lunarMonth) {
     return Sky.get(((yearSkyIndex % 5) * 2 + lunarMonth) % 10);
 }
@@ -62,17 +108,6 @@ app.post('/api/destiny', (req, res) => {
             '父母': ['父母', '疾厄', '子女', '田宅']
         };
 
-        // Helper to get star brightness
-        const getBrightness = (star, ground) => {
-            try {
-                if (star.getBrightness) {
-                    const b = star.getBrightness(ground);
-                    return b !== undefined && b !== null ? b : null;
-                }
-            } catch (e) { }
-            return null;
-        };
-
         res.json({
             config: { year: config.year, month: config.month, day: config.day, yearSky: config.yearSky.displayName, yearGround: config.yearGround.displayName, bornTime: config.bornTimeGround.displayName, gender: gender === 'M' ? '男' : '女' },
             element: board.element.displayName,
@@ -86,11 +121,11 @@ app.post('/api/destiny', (req, res) => {
                 temples: c.temples.map(t => t.displayName),
                 majorStars: c.majorStars.map(s => ({
                     name: s.displayName,
-                    brightness: getBrightness(s, c.ground)
+                    brightness: getStarBrightness(s.displayName, c.ground.displayName)
                 })),
                 minorStars: c.minorStars.map(s => ({
                     name: s.displayName,
-                    brightness: getBrightness(s, c.ground)
+                    brightness: getStarBrightness(s.displayName, c.ground.displayName)
                 })),
                 miniStars: c.miniStars.map(s => s.displayName),
                 scholarStar: c.scholarStar?.displayName || null,
