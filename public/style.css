@@ -1,0 +1,484 @@
+:root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --secondary: #ec4899;
+    --bg-dark: #0f172a;
+    --bg-card: #1e293b;
+    --bg-cell: #334155;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border: #475569;
+    --gold: #fbbf24;
+    --green: #22c55e;
+    --red: #ef4444;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+    background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a2e 100%);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    border-radius: 1rem;
+    box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
+}
+
+header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+}
+
+.input-section,
+.result-section {
+    background: var(--bg-card);
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+h2 {
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 150px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--bg-dark);
+    color: var(--text);
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+/* Make date picker calendar icon white for dark theme */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 0.8;
+}
+
+.btn {
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-weight: 600;
+}
+
+.btn.primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.btn.secondary {
+    background: var(--bg-cell);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+    margin-bottom: 0;
+}
+
+.btn-small {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    background: var(--bg-cell);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 0.4rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-small:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.info-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.info-card {
+    background: var(--bg-cell);
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border-left: 4px solid var(--primary);
+}
+
+.info-card h3 {
+    color: var(--gold);
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.info-card p {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+}
+
+.info-card .label {
+    color: var(--text-muted);
+}
+
+.info-card .value {
+    color: var(--text);
+    font-weight: 600;
+}
+
+/* Destiny Grid - 4x4 layout */
+.destiny-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 8px;
+    aspect-ratio: 1;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.cell {
+    background: var(--bg-cell);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.cell:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+    border-color: var(--primary);
+}
+
+.cell-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.cell-ground {
+    font-weight: 700;
+    color: var(--gold);
+    font-size: 1.1rem;
+}
+
+.cell-palace {
+    font-size: 0.8rem;
+    color: var(--secondary);
+}
+
+.cell-liuNian {
+    font-size: 0.75rem;
+    color: var(--green);
+    background: rgba(34, 197, 94, 0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.cell-stars {
+    flex: 1;
+    font-size: 0.85rem;
+    overflow-y: auto;
+}
+
+.major-stars {
+    color: var(--gold);
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.minor-stars {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.liu-stars {
+    color: var(--green);
+    font-size: 0.75rem;
+    margin-top: 4px;
+}
+
+.sihua {
+    color: var(--red);
+    font-size: 0.75rem;
+}
+
+.mini-stars {
+    color: #a78bfa;
+    font-size: 0.75rem;
+    margin-top: 2px;
+}
+
+.misc-stars {
+    color: #60a5fa;
+    font-size: 0.7rem;
+    margin-top: 2px;
+}
+
+.cell-age {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: auto;
+    text-align: right;
+}
+
+.cell-triangle {
+    font-size: 0.65rem;
+    color: #f472b6;
+    margin-top: 2px;
+    text-align: right;
+}
+
+/* Triangle highlight */
+.cell.highlight {
+    border: 2px solid var(--secondary) !important;
+    box-shadow: 0 0 15px rgba(236, 72, 153, 0.5) !important;
+    background: rgba(236, 72, 153, 0.1) !important;
+}
+
+/* Center cells (empty) */
+.cell.center {
+    background: rgba(30, 41, 59, 0.3);
+    border: 1px dashed var(--border);
+    pointer-events: none;
+}
+
+/* SVG overlay for triangle lines */
+.destiny-grid {
+    position: relative;
+}
+
+.triangle-svg-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.triangle-info-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 101;
+    background: rgba(30, 41, 59, 0.9);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--secondary);
+    display: none;
+}
+
+.triangle-info-center.show {
+    display: block;
+}
+
+.triangle-title {
+    color: var(--secondary);
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.triangle-palaces {
+    color: var(--text);
+    font-size: 0.85rem;
+}
+
+/* Month tabs */
+.month-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.month-tab {
+    padding: 0.5rem 1rem;
+    background: var(--bg-cell);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.month-tab:hover,
+.month-tab.active {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+/* Da Yun (10-year period) tabs */
+.daYun-periods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.daYun-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem 0.8rem;
+    background: var(--bg-cell);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 60px;
+}
+
+.daYun-tab:hover {
+    background: rgba(99, 102, 241, 0.2);
+}
+
+.daYun-tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.daYun-tab .period-age {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.daYun-tab .period-sky {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.daYun-tab.active .period-sky {
+    color: var(--text);
+}
+
+.cell-daYun {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-left: 0.5rem;
+}
+
+.daYun-stars {
+    color: #f59e0b;
+    font-size: 0.8rem;
+    margin-top: 2px;
+}
+
+/* Button row */
+.button-row {
+    justify-content: flex-start;
+    margin-bottom: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    .destiny-grid {
+        gap: 4px;
+    }
+
+    .cell {
+        padding: 0.5rem;
+    }
+
+    .cell-stars {
+        font-size: 0.75rem;
+    }
+}

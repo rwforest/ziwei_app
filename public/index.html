@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紫微斗數命盤</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🌟 紫微斗數命盤</h1>
+            <p class="subtitle">Zi Wei Dou Shu Fortune Chart</p>
+        </header>
+
+        <!-- Input Form -->
+        <section class="input-section">
+            <h2>📅 輸入資料</h2>
+            <form id="birthForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>曆法</label>
+                        <select id="calendarType">
+                            <option value="solar">公曆 (Solar)</option>
+                            <option value="lunar">農曆 (Lunar)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>性別</label>
+                        <select id="gender">
+                            <option value="M">男 Male</option>
+                            <option value="F">女 Female</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>出生日期 Birth Date</label>
+                        <input type="date" id="birthDate" value="1990-01-01" min="1900-01-01" max="2100-12-31">
+                    </div>
+                    <div class="form-group">
+                        <label>時辰 Hour</label>
+                        <select id="hour">
+                            <option value="0">子時 (23:00-01:00)</option>
+                            <option value="1">丑時 (01:00-03:00)</option>
+                            <option value="3">寅時 (03:00-05:00)</option>
+                            <option value="5">卯時 (05:00-07:00)</option>
+                            <option value="7">辰時 (07:00-09:00)</option>
+                            <option value="9">巳時 (09:00-11:00)</option>
+                            <option value="11">午時 (11:00-13:00)</option>
+                            <option value="13">未時 (13:00-15:00)</option>
+                            <option value="15">申時 (15:00-17:00)</option>
+                            <option value="17">酉時 (17:00-19:00)</option>
+                            <option value="19">戌時 (19:00-21:00)</option>
+                            <option value="21" selected>亥時 (21:00-23:00)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row" id="leapMonthRow" style="display: none;">
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="isLeapMonth"> 閏月 (Leap Month)
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="btn primary">排盤 Generate Chart</button>
+            </form>
+        </section>
+
+        <!-- Destiny Board Result -->
+        <section id="destinyResult" class="result-section" style="display: none;">
+            <div class="section-header">
+                <h2>📊 本命盤</h2>
+                <button type="button" class="btn-small" onclick="exportToJSON()">📥 匯出 JSON</button>
+            </div>
+            <div class="info-cards">
+                <div class="info-card">
+                    <h3>基本資料</h3>
+                    <div id="basicInfo"></div>
+                </div>
+                <div class="info-card">
+                    <h3>本命四化</h3>
+                    <div id="bornSiHua"></div>
+                </div>
+            </div>
+            <div id="destinyGrid" class="destiny-grid"></div>
+        </section>
+
+        <!-- Liu Nian Section -->
+        <section id="liuNianSection" class="result-section" style="display: none;">
+            <div class="section-header">
+                <h2>📅 流年運勢</h2>
+                <button type="button" class="btn-small" onclick="exportLiuNianToJSON()">📥 匯出流年 JSON</button>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>選擇年份</label>
+                    <input type="number" id="targetYear" value="2025" min="1900" max="2100">
+                </div>
+                <div class="form-group">
+                    <label>選擇歲數(大運)</label>
+                    <input type="number" id="targetAge" value="45" min="1" max="120">
+                </div>
+            </div>
+            <div class="form-row button-row">
+                <button type="button" class="btn secondary" onclick="getLiuNian()">查看流年</button>
+                <button type="button" class="btn secondary" onclick="getLiuYue()">查看流月</button>
+                <button type="button" class="btn secondary" onclick="getDaYun()">查看大運</button>
+            </div>
+            <div class="info-cards">
+                <div class="info-card">
+                    <h3>流年資料</h3>
+                    <div id="liuNianInfo"></div>
+                </div>
+                <div class="info-card">
+                    <h3>流年四化</h3>
+                    <div id="liuNianSiHua"></div>
+                </div>
+            </div>
+            <div id="liuNianGrid" class="destiny-grid"></div>
+        </section>
+
+        <!-- Da Yun Section -->
+        <section id="daYunSection" class="result-section" style="display: none;">
+            <div class="section-header">
+                <h2>🌟 大運運勢</h2>
+                <button type="button" class="btn-small" onclick="exportDaYunToJSON()">📥 匯出大運 JSON</button>
+            </div>
+            <div class="daYun-periods" id="daYunPeriods"></div>
+            <div class="info-cards">
+                <div class="info-card">
+                    <h3>大運資料</h3>
+                    <div id="daYunInfo"></div>
+                </div>
+                <div class="info-card">
+                    <h3>大運四化</h3>
+                    <div id="daYunSiHua"></div>
+                </div>
+            </div>
+            <div id="daYunGrid" class="destiny-grid"></div>
+        </section>
+
+        <!-- Liu Yue Section -->
+        <section id="liuYueSection" class="result-section" style="display: none;">
+            <div class="section-header">
+                <h2>📅 流月運勢</h2>
+                <button type="button" class="btn-small" onclick="exportLiuYueToJSON()">📥 匯出流月 JSON</button>
+            </div>
+            <div class="month-tabs" id="monthTabs"></div>
+            <div id="liuYueContent"></div>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
