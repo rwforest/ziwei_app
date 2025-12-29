@@ -24,6 +24,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 const palaceNames = ['命宮', '兄弟', '夫妻', '子女', '財帛', '疾厄', '遷移', '交友', '事業', '田宅', '福德', '父母'];
 const monthNames = ['正月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
 
+// 飛星四化 Transformation Table - maps 天干 to which stars receive 祿權科忌
+const flyingStarTable = {
+    '甲': { '祿': '廉貞', '權': '破軍', '科': '武曲', '忌': '太陽' },
+    '乙': { '祿': '天機', '權': '天梁', '科': '紫微', '忌': '太陰' },
+    '丙': { '祿': '天同', '權': '天機', '科': '文昌', '忌': '廉貞' },
+    '丁': { '祿': '太陰', '權': '天同', '科': '天機', '忌': '巨門' },
+    '戊': { '祿': '貪狼', '權': '太陰', '科': '右弼', '忌': '天機' },
+    '己': { '祿': '武曲', '權': '貪狼', '科': '天梁', '忌': '文曲' },
+    '庚': { '祿': '太陽', '權': '武曲', '科': '太陰', '忌': '天同' },
+    '辛': { '祿': '巨門', '權': '太陽', '科': '文曲', '忌': '文昌' },
+    '壬': { '祿': '天梁', '權': '紫微', '科': '左輔', '忌': '武曲' },
+    '癸': { '祿': '破軍', '權': '巨門', '科': '太陰', '忌': '貪狼' }
+};
+
 // ========== BRIGHTNESS TABLE CONFIGURATION ==========
 // 'zhongzhou' = 中州派 brightness (from brightness.csv)
 // 'sanhe' = 三合派 brightness (hardcoded default)
@@ -192,6 +206,31 @@ app.post('/api/destiny', (req, res) => {
                 ageStart: c.ageStart,
                 ageEnd: c.ageEnd,
                 lifeStage: c.lifeStage?.displayName || null,
+                // Flying star (飛星四化) - where the 4 transformations fly to from this palace
+                flyingStar: (() => {
+                    const skyName = c.sky.displayName;
+                    const transforms = flyingStarTable[skyName];
+                    if (!transforms) return null;
+
+                    const result = {};
+                    for (const [type, starName] of Object.entries(transforms)) {
+                        // Find which cell contains this star
+                        const targetCell = board.cells.find(cell =>
+                            cell.majorStars.some(s => s.displayName === starName) ||
+                            cell.minorStars.some(s => s.displayName === starName)
+                        );
+                        if (targetCell) {
+                            result[type] = {
+                                star: starName,
+                                ground: targetCell.ground.displayName,
+                                palace: targetCell.temples.map(t => t.displayName).join(' ')
+                            };
+                        } else {
+                            result[type] = { star: starName, ground: null, palace: null };
+                        }
+                    }
+                    return result;
+                })(),
                 // Find the first temple that exists in triangleMap (skip 身宮 which is not a standard palace)
                 triangle: (() => {
                     for (const t of c.temples) {

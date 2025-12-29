@@ -73,7 +73,11 @@
         <section id="destinyResult" class="result-section" style="display: none;">
             <div class="section-header">
                 <h2>📊 本命盤</h2>
-                <button type="button" class="btn-small" onclick="exportToJSON()">📥 匯出 JSON</button>
+                <div class="btn-row">
+                    <button type="button" class="btn-small" id="flyingStarBtn"
+                        onclick="toggleFlyingStarMode()">飛星模式</button>
+                    <button type="button" class="btn-small" onclick="exportToJSON()">📥 匯出 JSON</button>
+                </div>
             </div>
             <div class="info-cards">
                 <div class="info-card">

@@ -374,6 +374,32 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     font-size: 0.85rem;
 }
 
+/* Flying star mode */
+.cell.flying-target {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.25)) !important;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+}
+
+#flyingStarBtn.active {
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    color: white;
+    border-color: #8b5cf6;
+}
+
+.flying-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.btn-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
 /* Month tabs */
 .month-tabs {
     display: flex;

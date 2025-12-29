@@ -428,7 +428,7 @@ function renderGrid(containerId, cells, liuNianPalaces) {
             : '';
 
         return `
-            <div class="cell" data-palace="${palaceName}" data-ground="${groundName}" data-triangle='${triangleData}' onclick="highlightTriangle(this)">
+            <div class="cell" data-palace="${palaceName}" data-ground="${groundName}" data-triangle='${triangleData}' data-flyingstar='${cell.flyingStar ? JSON.stringify(cell.flyingStar) : "null"}' onclick="highlightTriangle(this)">
                 <div class="cell-header">
                     <span class="cell-ground">${cell.sky}${cell.ground}</span>
                     <div>
@@ -460,10 +460,17 @@ function renderGrid(containerId, cells, liuNianPalaces) {
     }
 }
 
-// Highlight triangle (三方四正) palaces
+// Highlight triangle (三方四正) palaces OR flying stars based on mode
 function highlightTriangle(element) {
     // Clear previous highlights
     document.querySelectorAll('.cell.highlight').forEach(el => el.classList.remove('highlight'));
+    document.querySelectorAll('.cell.flying-target').forEach(el => el.classList.remove('flying-target'));
+
+    // If flying star mode is enabled, show flying stars instead
+    if (flyingStarMode) {
+        highlightFlyingStar(element);
+        return;
+    }
 
     const triangle = JSON.parse(element.dataset.triangle || '[]');
     if (triangle.length === 0) return;
@@ -584,6 +591,7 @@ function highlightTriangle(element) {
 document.addEventListener('click', (e) => {
     if (!e.target.closest('.cell[data-palace]')) {
         document.querySelectorAll('.cell.highlight').forEach(el => el.classList.remove('highlight'));
+        document.querySelectorAll('.cell.flying-target').forEach(el => el.classList.remove('flying-target'));
         const svg = document.getElementById('triangleSvg');
         const info = document.getElementById('triangleInfo');
         if (svg) svg.innerHTML = '';
@@ -593,6 +601,124 @@ document.addEventListener('click', (e) => {
         }
     }
 });
+
+// Flying Star Mode State
+let flyingStarMode = false;
+
+// Toggle flying star mode
+function toggleFlyingStarMode() {
+    flyingStarMode = !flyingStarMode;
+    const btn = document.getElementById('flyingStarBtn');
+    if (btn) {
+        btn.classList.toggle('active', flyingStarMode);
+        btn.textContent = flyingStarMode ? '飛星模式 ✓' : '飛星模式';
+    }
+    // Clear any existing highlights
+    document.querySelectorAll('.cell.highlight').forEach(el => el.classList.remove('highlight'));
+    document.querySelectorAll('.cell.flying-target').forEach(el => el.classList.remove('flying-target'));
+    const svg = document.getElementById('triangleSvg');
+    const info = document.getElementById('triangleInfo');
+    if (svg) svg.innerHTML = '';
+    if (info) {
+        info.classList.remove('show');
+        info.innerHTML = '';
+    }
+}
+
+// Show flying stars from a clicked palace
+function highlightFlyingStar(cellEl) {
+    const flyingData = cellEl.dataset.flyingstar;
+    if (!flyingData || flyingData === 'null') return;
+
+    const flying = JSON.parse(flyingData);
+    const grid = cellEl.closest('.destiny-grid');
+    const gridRect = grid.getBoundingClientRect();
+    const groundOrder = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+
+    // Clear previous flying highlights
+    grid.querySelectorAll('.cell.flying-target').forEach(el => el.classList.remove('flying-target'));
+
+    // Highlight the source cell
+    cellEl.classList.add('highlight');
+
+    // Find and highlight target cells
+    const connections = [];
+    const sourceRect = cellEl.getBoundingClientRect();
+    const sourceX = sourceRect.left - gridRect.left + sourceRect.width / 2;
+    const sourceY = sourceRect.top - gridRect.top + sourceRect.height / 2;
+
+    const colors = { '祿': '#22c55e', '權': '#f59e0b', '科': '#3b82f6', '忌': '#ef4444' };
+
+    for (const [type, data] of Object.entries(flying)) {
+        if (data.ground) {
+            const targetCell = grid.querySelector(`.cell[data-ground="${data.ground}"]`);
+            if (targetCell) {
+                targetCell.classList.add('flying-target');
+                const targetRect = targetCell.getBoundingClientRect();
+                connections.push({
+                    type,
+                    star: data.star,
+                    palace: data.palace,
+                    color: colors[type],
+                    x: targetRect.left - gridRect.left + targetRect.width / 2,
+                    y: targetRect.top - gridRect.top + targetRect.height / 2
+                });
+            }
+        }
+    }
+
+    // Draw arrows in SVG
+    const svg = grid.querySelector('#triangleSvg');
+    const triangleInfo = grid.querySelector('#triangleInfo');
+
+    if (svg && connections.length > 0) {
+        svg.setAttribute('viewBox', `0 0 ${gridRect.width} ${gridRect.height}`);
+
+        let arrowsHtml = '';
+        connections.forEach(conn => {
+            // Draw line with arrow
+            arrowsHtml += `
+                <line x1="${sourceX}" y1="${sourceY}" x2="${conn.x}" y2="${conn.y}" 
+                    stroke="${conn.color}" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arrow-${conn.type})"/>
+                <circle cx="${conn.x}" cy="${conn.y}" r="8" fill="${conn.color}" opacity="0.8"/>
+                <text x="${conn.x}" y="${conn.y + 4}" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold">${conn.type}</text>
+            `;
+        });
+
+        // Add arrow markers
+        const defs = `
+            <defs>
+                <marker id="arrow-祿" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#22c55e"/>
+                </marker>
+                <marker id="arrow-權" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#f59e0b"/>
+                </marker>
+                <marker id="arrow-科" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#3b82f6"/>
+                </marker>
+                <marker id="arrow-忌" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#ef4444"/>
+                </marker>
+            </defs>
+        `;
+
+        svg.innerHTML = defs + arrowsHtml;
+    }
+
+    // Show flying star info in center
+    if (triangleInfo) {
+        triangleInfo.classList.add('show');
+        const palaceName = cellEl.querySelector('.cell-palace')?.textContent || '';
+        const skyName = cellEl.querySelector('.cell-ground')?.textContent?.charAt(0) || '';
+        triangleInfo.innerHTML = `
+            <div class="triangle-title">飛星四化 (${skyName})</div>
+            <div class="flying-legend">
+                ${connections.map(c => `<span style="color:${c.color}">化${c.type}→${c.star}</span>`).join(' ')}
+            </div>
+        `;
+    }
+}
 
 // Get Liu Nian (yearly fortune)
 async function getLiuNian() {
