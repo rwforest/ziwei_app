@@ -85,6 +85,7 @@ function renderDestinyBoard(data) {
         <p><span class="label">年柱:</span> <span class="value">${data.config.yearSky}${data.config.yearGround}年</span></p>
         <p><span class="label">性別:</span> <span class="value">${data.config.gender}</span></p>
         <p><span class="label">五行局:</span> <span class="value">${data.element}</span></p>
+        <p><span class="label">主星:</span> <span class="value">${data.destinyPalaceMajorStars}</span></p>
         <p><span class="label">命主:</span> <span class="value">${data.destinyMaster}</span></p>
         <p><span class="label">身主:</span> <span class="value">${data.bodyMaster}</span></p>
     `;
@@ -243,6 +244,7 @@ function renderDaYun(data) {
         <p><span class="label">歲數:</span> <span class="value">${data.age}歲</span></p>
         <p><span class="label">大運:</span> <span class="value">${data.ageRange}歲</span></p>
         <p><span class="label">天干:</span> <span class="value">${data.daYunSky}</span></p>
+        <p><span class="label">主星:</span> <span class="value">${data.daYunMajorStars}</span></p>
     `;
 
     // Render Si Hua
@@ -630,6 +632,7 @@ function renderLiuNian(data) {
     document.getElementById('liuNianInfo').innerHTML = `
         <p><span class="label">年份:</span> <span class="value">${data.year} (${data.yearSky}${data.yearGround}年)</span></p>
         <p><span class="label">虛歲:</span> <span class="value">${data.age + 1}歲</span></p>
+        <p><span class="label">主星:</span> <span class="value">${data.liuNianMajorStars}</span></p>
     `;
 
     document.getElementById('liuNianSiHua').innerHTML = Object.entries(data.liuNianSiHua)
@@ -705,6 +708,7 @@ function selectMonth(idx) {
             <div class="info-card">
                 <h3>流月資料</h3>
                 <p><span class="label">月份:</span> <span class="value">${month.monthName} (${month.monthSky}${month.monthGround})</span></p>
+                <p><span class="label">主星:</span> <span class="value">${month.liuYueMajorStars}</span></p>
             </div>
             <div class="info-card">
                 <h3>流月四化</h3>

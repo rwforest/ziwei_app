@@ -146,11 +146,31 @@ app.post('/api/destiny', (req, res) => {
             '父母': ['父母', '疾厄', '子女', '田宅']
         };
 
+        // Find 命宮 and get its major stars (if 空宮, get from 對宮 遷移)
+        const destinyPalaceCell = board.cells.find(c => c.temples.some(t => t.displayName === '命宮'));
+        let destinyPalaceMajorStars = '';
+        if (destinyPalaceCell && destinyPalaceCell.majorStars.length > 0) {
+            destinyPalaceMajorStars = destinyPalaceCell.majorStars.map(s => s.displayName).join(' ');
+        } else if (destinyPalaceCell) {
+            // 命宮 is 空宮, get from 對宮 (opposite palace, 6 positions away)
+            const destinyGround = destinyPalaceCell.ground;
+            const oppositeGroundIndex = (destinyGround.index + 6) % 12;
+            const oppositeCell = board.cells.find(c => c.ground.index === oppositeGroundIndex);
+            if (oppositeCell && oppositeCell.majorStars.length > 0) {
+                destinyPalaceMajorStars = oppositeCell.majorStars.map(s => s.displayName).join(' ') + ' (借)';
+            } else {
+                destinyPalaceMajorStars = '空宮';
+            }
+        } else {
+            destinyPalaceMajorStars = '空宮';
+        }
+
         res.json({
             config: { year: config.year, month: config.month, day: config.day, yearSky: config.yearSky.displayName, yearGround: config.yearGround.displayName, bornTime: config.bornTimeGround.displayName, gender: gender === 'M' ? '男' : '女' },
             element: board.element.displayName,
             destinyMaster: board.destinyMaster.displayName,
             bodyMaster: board.bodyMaster.displayName,
+            destinyPalaceMajorStars,
             bornSiHua,
             triangleMap,
             cells: board.cells.map(c => ({
@@ -216,8 +236,14 @@ app.post('/api/liuNian', (req, res) => {
                 liuNianPalace: palaceNames[i],
                 ground: pg.displayName,
                 benMingPalace: cell.temples.map(t => t.displayName),
-                majorStars: cell.majorStars.map(s => s.displayName),
-                minorStars: cell.minorStars.map(s => s.displayName),
+                majorStars: cell.majorStars.map(s => ({
+                    name: s.displayName,
+                    brightness: getStarBrightness(s.displayName, pg.displayName)
+                })),
+                minorStars: cell.minorStars.map(s => ({
+                    name: s.displayName,
+                    brightness: getStarBrightness(s.displayName, pg.displayName)
+                })),
                 miniStars: cell.miniStars.map(s => s.displayName),
                 scholarStar: cell.scholarStar?.displayName || null,
                 yearGodStar: cell.yearGodStar?.displayName || null,
@@ -227,7 +253,24 @@ app.post('/api/liuNian', (req, res) => {
             });
         }
 
-        res.json({ year: yr, yearSky: yearSky.displayName, yearGround: yearGround.displayName, age: yr - +birthYear, liuNianSiHua, palaces });
+        // Find 流年命宮 (first palace) and get its major stars
+        const liuNianMingGong = palaces.find(p => p.liuNianPalace === '命宮');
+        let liuNianMajorStars = '';
+        if (liuNianMingGong && liuNianMingGong.majorStars.length > 0) {
+            liuNianMajorStars = liuNianMingGong.majorStars.map(s => s.name).join(' ');
+        } else if (liuNianMingGong) {
+            // 流年命宮 is 空宮, get from 對宮
+            const oppositeIdx = palaces.findIndex(p => p.liuNianPalace === '遷移');
+            if (oppositeIdx !== -1 && palaces[oppositeIdx].majorStars.length > 0) {
+                liuNianMajorStars = palaces[oppositeIdx].majorStars.map(s => s.name).join(' ') + ' (借)';
+            } else {
+                liuNianMajorStars = '空宮';
+            }
+        } else {
+            liuNianMajorStars = '空宮';
+        }
+
+        res.json({ year: yr, yearSky: yearSky.displayName, yearGround: yearGround.displayName, age: yr - +birthYear, liuNianSiHua, liuNianMajorStars, palaces });
     } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
@@ -261,10 +304,41 @@ app.post('/api/liuYue', (req, res) => {
                 const lyStars = [], lySiHua = [];
                 mRuntimeStars.forEach((g, s) => { if (g.index === pg.index) lyStars.push(s.displayName); });
                 mDerivatives.forEach((s, d) => { if (cell.majorStars.concat(cell.minorStars).some(x => x.displayName === s.displayName)) lySiHua.push(d.displayName); });
-                palaces.push({ liuYuePalace: palaceNames[i], ground: pg.displayName, benMingPalace: cell.temples.map(t => t.displayName), majorStars: cell.majorStars.map(s => s.displayName), liuYueStars: lyStars, liuYueSiHua: lySiHua });
+                palaces.push({
+                    liuYuePalace: palaceNames[i],
+                    ground: pg.displayName,
+                    benMingPalace: cell.temples.map(t => t.displayName),
+                    majorStars: cell.majorStars.map(s => ({
+                        name: s.displayName,
+                        brightness: getStarBrightness(s.displayName, pg.displayName)
+                    })),
+                    minorStars: cell.minorStars.map(s => ({
+                        name: s.displayName,
+                        brightness: getStarBrightness(s.displayName, pg.displayName)
+                    })),
+                    liuYueStars: lyStars,
+                    liuYueSiHua: lySiHua
+                });
             }
 
-            months.push({ month: m, monthName: monthNames[m - 1], monthSky: mSky.displayName, monthGround: mGround.displayName, liuYueSiHua, palaces });
+            // Find 流月命宮 and get its major stars
+            const liuYueMingGong = palaces.find(p => p.liuYuePalace === '命宮');
+            let liuYueMajorStars = '';
+            if (liuYueMingGong && liuYueMingGong.majorStars.length > 0) {
+                liuYueMajorStars = liuYueMingGong.majorStars.map(s => s.name).join(' ');
+            } else if (liuYueMingGong) {
+                // 流月命宮 is 空宮, get from 對宮
+                const oppositeIdx = palaces.findIndex(p => p.liuYuePalace === '遷移');
+                if (oppositeIdx !== -1 && palaces[oppositeIdx].majorStars.length > 0) {
+                    liuYueMajorStars = palaces[oppositeIdx].majorStars.map(s => s.name).join(' ') + ' (借)';
+                } else {
+                    liuYueMajorStars = '空宮';
+                }
+            } else {
+                liuYueMajorStars = '空宮';
+            }
+
+            months.push({ month: m, monthName: monthNames[m - 1], monthSky: mSky.displayName, monthGround: mGround.displayName, liuYueSiHua, liuYueMajorStars, palaces });
         }
 
         res.json({ year: yr, months });
@@ -328,11 +402,34 @@ app.post('/api/daYun', (req, res) => {
                 daYunPalace: palaceNames[i],
                 ground: pg.displayName,
                 benMingPalace: cell.temples.map(t => t.displayName),
-                majorStars: cell.majorStars.map(s => s.displayName),
-                minorStars: cell.minorStars.map(s => s.displayName),
+                majorStars: cell.majorStars.map(s => ({
+                    name: s.displayName,
+                    brightness: getStarBrightness(s.displayName, pg.displayName)
+                })),
+                minorStars: cell.minorStars.map(s => ({
+                    name: s.displayName,
+                    brightness: getStarBrightness(s.displayName, pg.displayName)
+                })),
                 daYunStars: dyStars,
                 daYunSiHua: dySiHua
             });
+        }
+
+        // Find 大運命宮 (first palace) and get its major stars
+        const daYunMingGong = palaces.find(p => p.daYunPalace === '命宮');
+        let daYunMajorStars = '';
+        if (daYunMingGong && daYunMingGong.majorStars.length > 0) {
+            daYunMajorStars = daYunMingGong.majorStars.map(s => s.name).join(' ');
+        } else if (daYunMingGong) {
+            // 大運命宮 is 空宮, get from 對宮
+            const oppositeIdx = palaces.findIndex(p => p.daYunPalace === '遷移');
+            if (oppositeIdx !== -1 && palaces[oppositeIdx].majorStars.length > 0) {
+                daYunMajorStars = palaces[oppositeIdx].majorStars.map(s => s.name).join(' ') + ' (借)';
+            } else {
+                daYunMajorStars = '空宮';
+            }
+        } else {
+            daYunMajorStars = '空宮';
         }
 
         res.json({
@@ -340,6 +437,7 @@ app.post('/api/daYun', (req, res) => {
             ageRange: `${daYunAgeStart}-${daYunAgeEnd}`,
             daYunSky: daYunSky.displayName,
             daYunSiHua,
+            daYunMajorStars,
             allDaYun,
             palaces
         });
