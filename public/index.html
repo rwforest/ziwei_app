@@ -111,6 +111,7 @@
             <div class="form-row button-row">
                 <button type="button" class="btn secondary" onclick="getLiuNian()">查看流年</button>
                 <button type="button" class="btn secondary" onclick="getLiuYue()">查看流月</button>
+                <button type="button" class="btn secondary" onclick="getLiuRi()">查看流日</button>
                 <button type="button" class="btn secondary" onclick="getDaYun()">查看大運</button>
             </div>
             <div class="info-cards">
@@ -156,6 +157,34 @@
             <div id="liuYueContent"></div>
         </section>
     </div>
+
+    <!-- Liu Ri Section (Daily Fortune) -->
+    <section id="liuRiSection" class="result-section" style="display: none;">
+        <div class="section-header">
+            <h2>📅 流日運勢</h2>
+            <button type="button" class="btn-small" onclick="exportLiuRiToJSON()">📥 匯出流日 JSON</button>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>選擇日期</label>
+                <input type="date" id="targetDate" min="1900-01-01" max="2100-12-31">
+            </div>
+            <div class="form-group" style="display:flex;align-items:flex-end;">
+                <button type="button" class="btn secondary" onclick="getLiuRi()">查看流日</button>
+            </div>
+        </div>
+        <div class="info-cards">
+            <div class="info-card">
+                <h3>流日資料</h3>
+                <div id="liuRiInfo"></div>
+            </div>
+            <div class="info-card">
+                <h3>流日四化</h3>
+                <div id="liuRiSiHua"></div>
+            </div>
+        </div>
+        <div id="liuRiGrid" class="destiny-grid"></div>
+    </section>
 
     <script src="app.js"></script>
 </body>

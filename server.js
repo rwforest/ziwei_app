@@ -9,7 +9,8 @@ import {
     Gender,
     Runtime,
     Sky,
-    Ground
+    Ground,
+    defaultCalendar
 } from 'fortel-ziweidoushu';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -381,6 +382,111 @@ app.post('/api/liuYue', (req, res) => {
         }
 
         res.json({ year: yr, months });
+    } catch (e) { res.status(400).json({ error: e.message }); }
+});
+
+// Helper function: Calculate Day Sky (日干) and Day Ground (日支)
+// Based on: 日干 = (年干 * 5 + 月干) * 2 + 日數 mod 10
+// 日支 = (月支 + 日數) mod 12
+function getDaySkyGround(yearSkyIndex, lunarMonth, lunarDay) {
+    const monthSkyIndex = ((yearSkyIndex % 5) * 2 + lunarMonth) % 10;
+    const monthGroundIndex = (lunarMonth + 1) % 12;
+
+    // Simplified day calculation based on lunar day
+    // Day Sky cycles every 10 days, Day Ground cycles every 12 days
+    const daySkyIndex = (monthSkyIndex * 2 + lunarDay - 1) % 10;
+    const dayGroundIndex = (monthGroundIndex + lunarDay - 1) % 12;
+
+    return {
+        daySky: Sky.get(daySkyIndex),
+        dayGround: Ground.get(dayGroundIndex)
+    };
+}
+
+// API: Daily fortune (流日)
+app.post('/api/liuRi', (req, res) => {
+    try {
+        const { birthYear, birthMonth, birthDay, birthHour, gender, calendarType, isLeapMonth, targetSolarDate } = req.body;
+
+        const config = calendarType === 'solar'
+            ? DestinyConfigBuilder.withSolar({ year: +birthYear, month: +birthMonth, day: +birthDay, bornTimeGround: DayTimeGround.getByHour(+birthHour), configType: ConfigType.SKY, gender: gender === 'M' ? Gender.M : Gender.F })
+            : DestinyConfigBuilder.withlunar({ year: +birthYear, month: +birthMonth, day: +birthDay, isLeapMonth: isLeapMonth || false, bornTimeGround: DayTimeGround.getByHour(+birthHour), configType: ConfigType.SKY, gender: gender === 'M' ? Gender.M : Gender.F });
+
+        const board = new DestinyBoard(config);
+
+        // Convert solar date to lunar
+        const [sYear, sMonth, sDay] = targetSolarDate.split('-').map(Number);
+        const lunarDate = defaultCalendar.solar2lunar(sYear, sMonth, sDay);
+        const yr = lunarDate.lunarYear;
+        const lMonth = lunarDate.lunarMonth;
+        const lDay = lunarDate.lunarDay;
+
+        const yearSkyIndex = (yr - 4) % 10;
+        const monthSky = getMonthSky(yearSkyIndex, lMonth);
+        const monthGround = getMonthGround(lMonth);
+
+        // Calculate Day Sky and Ground
+        const { daySky, dayGround } = getDaySkyGround(yearSkyIndex, lMonth, lDay);
+
+        const dayDerivatives = Runtime.getDerivativeMapOf(daySky);
+        const dayRuntimeStars = Runtime.getRuntimeStarsLocation(daySky);
+
+        const liuRiSiHua = {};
+        dayDerivatives.forEach((s, d) => { liuRiSiHua[d.displayName] = s.displayName; });
+
+        // 流日宮位 - starting from the day's ground position
+        const palaces = [];
+        for (let i = 0; i < 12; i++) {
+            const pg = Ground.get((dayGround.index - i + 12) % 12);
+            const cell = board.getCellByGround(pg);
+            const lrStars = [], lrSiHua = [];
+            dayRuntimeStars.forEach((g, s) => { if (g.index === pg.index) lrStars.push(s.displayName); });
+            dayDerivatives.forEach((s, d) => { if (cell.majorStars.concat(cell.minorStars).some(x => x.displayName === s.displayName)) lrSiHua.push(d.displayName); });
+            palaces.push({
+                liuRiPalace: palaceNames[i],
+                ground: pg.displayName,
+                benMingPalace: cell.temples.map(t => t.displayName),
+                majorStars: cell.majorStars.map(s => ({
+                    name: s.displayName,
+                    brightness: getStarBrightness(s.displayName, pg.displayName)
+                })),
+                minorStars: cell.minorStars.map(s => ({
+                    name: s.displayName,
+                    brightness: getStarBrightness(s.displayName, pg.displayName)
+                })),
+                liuRiStars: lrStars,
+                liuRiSiHua: lrSiHua
+            });
+        }
+
+        // Find 流日命宮 and get its major stars
+        const liuRiMingGong = palaces.find(p => p.liuRiPalace === '命宮');
+        let liuRiMajorStars = '';
+        if (liuRiMingGong && liuRiMingGong.majorStars.length > 0) {
+            liuRiMajorStars = liuRiMingGong.majorStars.map(s => s.name).join(' ');
+        } else if (liuRiMingGong) {
+            // 流日命宮 is 空宮, get from 對宮
+            const oppositeIdx = palaces.findIndex(p => p.liuRiPalace === '遷移');
+            if (oppositeIdx !== -1 && palaces[oppositeIdx].majorStars.length > 0) {
+                liuRiMajorStars = palaces[oppositeIdx].majorStars.map(s => s.name).join(' ') + ' (借)';
+            } else {
+                liuRiMajorStars = '空宮';
+            }
+        } else {
+            liuRiMajorStars = '空宮';
+        }
+
+        res.json({
+            year: yr,
+            lunarMonth: lMonth,
+            lunarDay: lDay,
+            monthName: monthNames[lMonth - 1],
+            daySky: daySky.displayName,
+            dayGround: dayGround.displayName,
+            liuRiSiHua,
+            liuRiMajorStars,
+            palaces
+        });
     } catch (e) { res.status(400).json({ error: e.message }); }
 });
 

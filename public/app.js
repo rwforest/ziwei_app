@@ -3,6 +3,7 @@ let currentData = null;
 let currentLiuNianData = null;
 let currentDaYunData = null;
 let currentLiuYueData = null;
+let currentLiuRiData = null;
 
 // DOM Elements
 const birthForm = document.getElementById('birthForm');
@@ -854,4 +855,179 @@ function selectMonth(idx) {
             liuNianSiHua: p.liuYueSiHua
         })));
     }
+}
+
+// Chinese day names
+const dayNames = ['初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十',
+    '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+    '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十'];
+
+// Initialize target date to today
+document.addEventListener('DOMContentLoaded', () => {
+    const targetDateInput = document.getElementById('targetDate');
+    if (targetDateInput) {
+        targetDateInput.value = new Date().toISOString().split('T')[0];
+    }
+});
+
+// Get Liu Ri (daily fortune)
+async function getLiuRi() {
+    const birthDate = document.getElementById('birthDate').value;
+    const [year, month, day] = birthDate.split('-');
+
+    // Get target date (default to today if not set)
+    let targetDate = document.getElementById('targetDate').value;
+    if (!targetDate) {
+        targetDate = new Date().toISOString().split('T')[0];
+        document.getElementById('targetDate').value = targetDate;
+    }
+
+    const formData = {
+        birthYear: year,
+        birthMonth: month,
+        birthDay: day,
+        birthHour: document.getElementById('hour').value,
+        gender: document.getElementById('gender').value,
+        calendarType: document.getElementById('calendarType').value,
+        isLeapMonth: document.getElementById('isLeapMonth').checked,
+        targetSolarDate: targetDate
+    };
+
+    try {
+        const res = await fetch('/api/liuRi', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+
+        if (!res.ok) throw new Error((await res.json()).error);
+
+        currentLiuRiData = await res.json();
+        currentLiuRiData.solarDate = targetDate;  // Store original solar date
+        renderLiuRi(currentLiuRiData);
+
+        document.getElementById('liuRiSection').style.display = 'block';
+        // Auto-scroll to the Liu Ri section
+        setTimeout(() => {
+            document.getElementById('liuRiSection').scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+    } catch (err) {
+        alert('錯誤: ' + err.message);
+    }
+}
+
+// Render Liu Ri
+function renderLiuRi(data) {
+    // Render info with both solar and lunar date
+    document.getElementById('liuRiInfo').innerHTML = `
+        <p><span class="label">公曆:</span> <span class="value">${data.solarDate || ''}</span></p>
+        <p><span class="label">農曆:</span> <span class="value">${data.monthName}${dayNames[data.lunarDay - 1]} (${data.daySky}${data.dayGround}日)</span></p>
+        <p><span class="label">主星:</span> <span class="value">${data.liuRiMajorStars}</span></p>
+    `;
+
+    // Render Si Hua
+    document.getElementById('liuRiSiHua').innerHTML = Object.entries(data.liuRiSiHua)
+        .map(([k, v]) => `<p><span class="label">化${k}:</span> <span class="value">${v}</span></p>`)
+        .join('');
+
+    // Render grid with Liu Ri overlay
+    if (currentData) {
+        renderLiuRiGrid('liuRiGrid', currentData.cells, data.palaces);
+    }
+}
+
+// Render Liu Ri Grid
+function renderLiuRiGrid(containerId, cells, liuRiPalaces) {
+    const container = document.getElementById(containerId);
+
+    const gridPositions = {
+        5: [0, 0], 6: [0, 1], 7: [0, 2], 8: [0, 3],
+        4: [1, 0], 9: [1, 3],
+        3: [2, 0], 10: [2, 3],
+        2: [3, 0], 1: [3, 1], 0: [3, 2], 11: [3, 3]
+    };
+
+    const gridCells = Array(16).fill(null);
+
+    cells.forEach((cell, idx) => {
+        const groundIndex = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'].indexOf(cell.ground);
+        if (gridPositions[groundIndex]) {
+            const [row, col] = gridPositions[groundIndex];
+            const gridIdx = row * 4 + col;
+            const lrp = liuRiPalaces.find(p => p.ground === cell.ground);
+            gridCells[gridIdx] = { ...cell, liuRiPalace: lrp };
+        }
+    });
+
+    container.innerHTML = gridCells.map((cell, idx) => {
+        if ([5, 6, 9, 10].includes(idx)) {
+            return '<div class="cell center"></div>';
+        }
+        if (!cell) return '<div class="cell center"></div>';
+
+        const lrp = cell.liuRiPalace;
+        const palaceName = cell.temples[0] || '';
+        const groundName = cell.ground;
+        const triangleData = cell.triangle ? JSON.stringify(cell.triangle) : '[]';
+
+        return `
+            <div class="cell" data-palace="${palaceName}" data-ground="${groundName}" data-triangle='${triangleData}' onclick="highlightTriangle(this)">
+                <div class="cell-header">
+                    <span class="cell-ground">${cell.sky}${cell.ground}</span>
+                    <div>
+                        <span class="cell-palace">${cell.temples.join(' ')}</span>
+                        ${lrp ? `<span class="cell-liuRi">${lrp.liuRiPalace}</span>` : ''}
+                    </div>
+                </div>
+                <div class="cell-stars">
+                    ${cell.majorStars.length ? `<div class="major-stars">${formatStarsWithBrightness(cell.majorStars)}</div>` : '<div class="major-stars" style="color:#666">空宮</div>'}
+                    ${cell.minorStars?.length ? `<div class="minor-stars">${formatStarsWithBrightness(cell.minorStars)}</div>` : ''}
+                    ${lrp?.liuRiStars?.length ? `<div class="liuRi-stars">流日: ${lrp.liuRiStars.join(' ')}</div>` : ''}
+                    ${lrp?.liuRiSiHua?.length ? `<div class="sihua">四化: ${lrp.liuRiSiHua.join(' ')}</div>` : ''}
+                </div>
+                ${cell.ageStart ? `<div class="cell-age">${cell.ageStart}-${cell.ageEnd}歲</div>` : ''}
+                ${cell.triangle?.length ? `<div class="cell-triangle">三方: ${cell.triangle.slice(1).join(' ')}</div>` : ''}
+            </div>
+        `;
+    }).join('');
+
+    // Add SVG overlay for triangle lines
+    const existingSvg = container.querySelector('.triangle-svg-overlay');
+    if (!existingSvg) {
+        container.insertAdjacentHTML('beforeend', `
+            <svg class="triangle-svg-overlay" id="triangleSvg"></svg>
+            <div class="triangle-info-center" id="triangleInfo"></div>
+        `);
+    }
+}
+
+// Export Liu Ri data to JSON file
+function exportLiuRiToJSON() {
+    if (!currentData) {
+        alert('請先生成命盤');
+        return;
+    }
+    if (!currentLiuRiData) {
+        alert('請先查看流日運勢');
+        return;
+    }
+
+    const targetDate = document.getElementById('targetDate').value;
+
+    const exportData = {
+        exportDate: new Date().toISOString(),
+        targetDate: targetDate,
+        birthChart: currentData,
+        liuRi: currentLiuRiData
+    };
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `紫微斗數_流日${targetDate}_${currentData.config.year}年${currentData.config.month}月${currentData.config.day}日.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
